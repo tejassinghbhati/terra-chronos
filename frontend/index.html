@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terra Chronos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/globe.gl@2.34.4/dist/globe.gl.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ─── Loading overlay ─────────────────────────────────────────── -->
+  <div id="app-loading">
+    <div class="loading-inner">
+      <div class="loading-globe">🌍</div>
+      <div class="loading-title">TERRA CHRONOS</div>
+      <div class="loading-subtitle">Loading assets…</div>
+      <div class="loading-bar">
+        <div class="loading-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Top bar ──────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <div class="brand-wrap">
+      <span class="brand-icon">🌍</span>
+      <div>
+        <h1>TERRA CHRONOS</h1>
+        <p>15,000 years of civilization growth</p>
+      </div>
+    </div>
+
+    <div id="yearDisplay">13,000 BCE</div>
+
+    <div class="topbar-right">
+      <div class="mode-toggle">
+        <button id="modeHistorical" class="active">Historical</button>
+        <button id="modeCounterfactual">Counterfactual</button>
+      </div>
+      <div id="llm-status">
+        <span id="llm-dot"></span>
+        <span id="llm-text">checking…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Globe ────────────────────────────────────────────────────── -->
+  <div id="globe-container"></div>
+
+  <!-- ─── Left panel ───────────────────────────────────────────────── -->
+  <aside id="left-panel">
+
+    <div class="panel-header">
+      <span class="badge">1</span>
+      HISTORICAL TIMELINE
+    </div>
+
+    <div id="timeline-container">
+      <span class="timeline-label-top" id="tlTop">2024 CE</span>
+      <div class="timeline-track">
+        <input id="timelineScrubber" type="range"
+               min="0" max="18" value="0" step="1">
+        <div id="timelineMarker"><span id="markerPill">13,000 BCE</span></div>
+      </div>
+      <span class="timeline-label-bottom" id="tlBottom">13,000 BCE</span>
+      <span class="timeline-span">15,000 Years</span>
+    </div>
+
+    <div class="panel-header">
+      <span class="badge">2</span>
+      SPEED CONTROL
+    </div>
+
+    <div id="speed-controls">
+      <button class="speed-btn" data-speed="0.5">½×</button>
+      <button class="speed-btn active" data-speed="1">1×</button>
+      <button class="speed-btn" data-speed="2">2×</button>
+    </div>
+
+    <div class="panel-header">
+      <span class="badge">3</span>
+      PROMPT INPUT (EVERY 1000 YRS):
+    </div>
+
+    <div id="prompt-box">
+      <textarea id="promptInput" disabled
+        placeholder='e.g. "A great drought collapses the Indus Valley civilization, survivors migrate east" — your decision shapes the next 1000 years'></textarea>
+      <button id="promptSubmit" disabled>Apply to Simulation</button>
+    </div>
+
+    <div id="sim-status">
+      <div class="status-row">
+        <span class="status-label">CURRENT ERA:</span>
+        <span class="status-value" id="eraName">Late Paleolithic</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">SIM SPEED:</span>
+        <span class="status-value" id="simSpeed">1000 YRS/MIN</span>
+      </div>
+      <div id="travelProgress" style="display:none">
+        <span id="travelLabel" class="status-label">TRAVELING…</span>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="export-wrap">
+      <button id="exportBtn">↓ Export CSV</button>
+    </div>
+
+  </aside>
+
+  <!-- ─── Right panel ───────────────────────────────────────────────── -->
+  <aside id="right-panel">
+
+    <div class="panel-header">
+      <span class="badge">1</span>
+      HISTORICAL ANALYTICS
+      <span id="analyticsYear" style="margin-left:auto;font-weight:400;font-size:10px;color:var(--muted)">(13,000 BCE)</span>
+    </div>
+
+    <div id="pop-section">
+      <div class="section-label">EST. TOTAL POPULATION</div>
+      <div id="popCount">5M</div>
+      <div id="popComparison">—</div>
+      <canvas id="popSparkline" height="40"></canvas>
+    </div>
+
+    <div id="heatmap-section">
+      <div class="section-label">ECONOMIC GROWTH INDEX</div>
+      <div id="economicHeatmap"></div>
+      <p id="heatmapNarration"></p>
+    </div>
+
+    <div id="civs-section">
+      <div class="section-label">TOP CIVILIZATIONS</div>
+      <ol id="civRankings"></ol>
+    </div>
+
+    <div id="narration-section">
+      <div class="section-label">MILLENNIUM NARRATION</div>
+      <p id="narrationText"></p>
+    </div>
+
+  </aside>
+
+  <!-- ─── Collapse alert ───────────────────────────────────────────── -->
+  <div id="collapse-alert"></div>
+
+  <!-- ─── Events log (toggle with E key) ──────────────────────────── -->
+  <div id="events-log">
+    <div class="events-header">
+      <span>Events Log</span>
+      <button id="eventsClose">✕</button>
+    </div>
+    <div id="eventsList"></div>
+  </div>
+
+  <!-- ─── Scripts (order matters) ──────────────────────────────────── -->
+  <script src="data/history.js"></script>
+  <script src="engine/EventBus.js"></script>
+  <script src="engine/StateManager.js"></script>
+  <script src="engine/AssetLoader.js"></script>
+  <script src="engine/SceneManager.js"></script>
+  <script src="systems/Renderer.js"></script>
+  <script src="systems/DataManager.js"></script>
+  <script src="systems/NarrativeDirector.js"></script>
+  <script src="systems/ResilienceManager.js"></script>
+  <script src="hud/Timeline.js"></script>
+  <script src="hud/PopulationDisplay.js"></script>
+  <script src="hud/EconomicHeatmap.js"></script>
+  <script src="hud/CivRankings.js"></script>
+  <script src="hud/StatusBox.js"></script>
+  <script src="hud/HUD.js"></script>
+  <script src="audio/AudioDirector.js"></script>
+  <script src="engine/GameClock.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
