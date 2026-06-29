@@ -8,6 +8,9 @@ class Timeline {
     this.yearDisplay = document.getElementById('yearDisplay');
     this.analyticsY  = document.getElementById('analyticsYear');
     this.marker      = document.getElementById('timelineMarker');
+    // Globe status bar
+    this.gsbEra      = document.getElementById('gsb-era');
+    this.gsbIdx      = document.getElementById('gsb-idx');
   }
 
   init() {
@@ -28,20 +31,27 @@ class Timeline {
     this._updatePill(snapshot.year);
     this._updateEra(snapshot.year);
     this._updateMarkerPosition();
+    if (this.gsbIdx) this.gsbIdx.textContent = `${String(index + 1).padStart(2,'0')} / 19`;
   }
 
   _updatePill(year) {
+    const bp    = year < 0
+      ? `−${Math.abs(year).toLocaleString()} BP`
+      : year === 0 ? '1 CE' : `${year} CE`;
     const label = year < 0
       ? `${Math.abs(year).toLocaleString()} BCE`
       : year === 0 ? '1 CE' : `${year} CE`;
-    if (this.markerPill)  this.markerPill.textContent  = label;
-    if (this.yearDisplay) this.yearDisplay.textContent  = label;
-    if (this.analyticsY)  this.analyticsY.textContent  = `(${label})`;
+    if (this.markerPill)  this.markerPill.textContent  = bp;
+    if (this.yearDisplay) this.yearDisplay.textContent  = bp;
+    if (this.analyticsY)  this.analyticsY.textContent  = bp;
   }
 
   _updateEra(year) {
     const era = ERA_NAMES.find(e => year >= e.year_start && year < e.year_end);
-    if (era && this.eraNameEl) this.eraNameEl.textContent = era.name;
+    if (era) {
+      if (this.eraNameEl) this.eraNameEl.textContent = era.name;
+      if (this.gsbEra)    this.gsbEra.textContent    = era.name.toUpperCase();
+    }
   }
 
   _updateMarkerPosition() {

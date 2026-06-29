@@ -4,6 +4,7 @@ class PopulationDisplay {
     this.popCompEl  = document.getElementById('popComparison');
     this.canvas     = document.getElementById('popSparkline');
     this.ctx        = this.canvas ? this.canvas.getContext('2d') : null;
+    this.gsbPop     = document.getElementById('gsb-pop');
     this.history    = [];
     this.currentPop = 0;
     this.animFrame  = null;
@@ -66,7 +67,8 @@ class PopulationDisplay {
     const X   = i => (i / (this.history.length - 1)) * w;
     const Y   = v => h - 4 - ((v - min) / (max - min || 1)) * (h - 8);
 
-    this.ctx.strokeStyle = '#38bdf8';
+    if (this.gsbPop) this.gsbPop.textContent = this._format(this.currentPop);
+    this.ctx.strokeStyle = '#00d4ff';
     this.ctx.lineWidth   = 1.5;
     this.ctx.lineJoin    = 'round';
     this.ctx.beginPath();

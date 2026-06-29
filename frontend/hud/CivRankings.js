@@ -1,7 +1,7 @@
 class CivRankings {
   constructor() {
     this.listEl    = document.getElementById('civRankings');
-    this.prevRanks = {};
+    this.gsbRegions = document.getElementById('gsb-regions');
   }
 
   init() {
@@ -11,14 +11,14 @@ class CivRankings {
   _update(regions) {
     if (!regions || !this.listEl) return;
 
-    const sorted = [...regions]
-      .sort((a, b) => b.pop - a.pop)
-      .slice(0, 6);
+    if (this.gsbRegions) this.gsbRegions.textContent = regions.length;
+
+    const sorted = [...regions].sort((a, b) => b.pop - a.pop).slice(0, 6);
 
     this.listEl.innerHTML = sorted.map((r, i) => `
       <li class="civ-item">
-        <span class="rank-num">${i + 1}.</span>
-        <span class="civ-dot" style="background:${CIV_COLORS[r.civ_type] || '#888'}"></span>
+        <span class="rank-num">${String(i + 1).padStart(2,'0')}</span>
+        <span class="civ-dot" style="background:${CIV_COLORS[r.civ_type] || '#555'}"></span>
         <span class="civ-name">${r.name}</span>
         <span class="civ-pop">${r.pop.toFixed(1)}M</span>
       </li>
