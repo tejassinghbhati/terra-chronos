@@ -42,15 +42,10 @@ class Renderer {
     this._initDotPool();
     this._initAtmospherePulse();
 
-    window.Bus.on('MILLENNIUM_DATA', (data) => {
-      this.transitionToRegions(data.regions);
-    });
-    window.Bus.on('COLLAPSE_EVENT', (data) => {
-      this._triggerCollapseEffect(data.regionId);
-    });
-    window.Bus.on('FOCUS_REGION', (data) => {
-      this._focusCamera(data.lat, data.lng);
-    });
+    window.Bus.on('FRAME_TICK',      (data) => this.updateTransition(data.deltaMs));
+    window.Bus.on('MILLENNIUM_DATA', (data) => this.transitionToRegions(data.regions));
+    window.Bus.on('COLLAPSE_EVENT',  (data) => this._triggerCollapseEffect(data.regionId));
+    window.Bus.on('FOCUS_REGION',    (data) => this._focusCamera(data.lat, data.lng));
   }
 
   _initDotPool() {
@@ -163,6 +158,9 @@ class Renderer {
     this.isTransitioning = true;
     this.transitionProgress = 0;
     this._transitionStartTime = performance.now();
+
+    // Push immediately so dots appear on the first frame
+    if (this.globe) this.globe.pointsData(this.activeDots);
   }
 
   updateTransition(deltaMs) {
